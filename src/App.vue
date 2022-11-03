@@ -62,6 +62,14 @@ const foodCheck = (x: number, y: number) => {
   }
 };
 
+const bodyCollisionCheck = (x: number, y: number) => {
+  for (let sn of storeGameRefs.snake.value) {
+    if (sn.x === x && sn.y === y) {
+      stopGame();
+    }
+  }
+};
+
 const eatFood = () => {
   addToSnake();
   generateFood();
@@ -69,21 +77,25 @@ const eatFood = () => {
 
 const addToSnake = () => {
   let snake = storeGameRefs.snake.value;
+
   if (storeGameRefs.snake.value.length === 1) {
     snake.push({
       x: snake[0].x,
-      y: snake[0].y - 1,
+      y: snake[0].y,
     });
   } else {
     let tail = storeGameRefs.snake.value.slice(1);
-    console.log(tail);
+    snake.push({
+      x: tail[0].x,
+      y: tail[0].y,
+    });
   }
 
   storeGame.$patch({
     snake: snake,
   });
 
-  console.log(storeGameRefs.snake.value);
+  console.log(storeGameRefs.snake.value, "up");
 };
 
 const changeDirection = (e: KeyboardEvent) => {
@@ -98,6 +110,16 @@ const changeDirection = (e: KeyboardEvent) => {
   });
 };
 
+const moveBody = (index: number, snake: coordinates) => {
+  let partX = storeGameRefs.snake.value[index - 1].x;
+  let partY = storeGameRefs.snake.value[index - 1].y;
+
+  return {
+    x: partX,
+    y: partY,
+  };
+};
+
 const onTick = () => {
   if (snakeHitWall.value) {
     stopGame();
@@ -106,17 +128,28 @@ const onTick = () => {
 
   let newSnakeCords: coordinates[] = [];
 
+  storeGame.$patch({
+    snakeLastPos: storeGameRefs.snake.value,
+  });
+
   if (!storeGameRefs.direction.value) return;
 
   if (storeGameRefs.direction.value === "KeyW") {
     for (let [idx, sn] of storeGameRefs.snake.value.entries()) {
-      newSnakeCords.push({
-        x: sn.x,
-        y: sn.y - 1,
-      });
-
       if (idx === 0) {
         foodCheck(sn.x, sn.y - 1);
+
+        newSnakeCords.push({
+          x: sn.x,
+          y: sn.y - 1,
+        });
+      } else {
+        let parts = moveBody(idx, sn);
+
+        newSnakeCords.push({
+          x: parts.x,
+          y: parts.y,
+        });
       }
 
       if (idx === 0 && sn.y - 1 < 0) {
@@ -125,13 +158,21 @@ const onTick = () => {
     }
   } else if (storeGameRefs.direction.value === "KeyA") {
     for (let [idx, sn] of storeGameRefs.snake.value.entries()) {
-      newSnakeCords.push({
-        x: sn.x - 1,
-        y: sn.y,
-      });
-
       if (idx === 0) {
         foodCheck(sn.x - 1, sn.y);
+        bodyCollisionCheck(sn.x - 1, sn.y);
+
+        newSnakeCords.push({
+          x: sn.x - 1,
+          y: sn.y,
+        });
+      } else {
+        let parts = moveBody(idx, sn);
+
+        newSnakeCords.push({
+          x: parts.x,
+          y: parts.y,
+        });
       }
 
       if (idx === 0 && sn.x - 1 < 0) {
@@ -140,13 +181,20 @@ const onTick = () => {
     }
   } else if (storeGameRefs.direction.value === "KeyS") {
     for (let [idx, sn] of storeGameRefs.snake.value.entries()) {
-      newSnakeCords.push({
-        x: sn.x,
-        y: sn.y + 1,
-      });
-
       if (idx === 0) {
         foodCheck(sn.x, sn.y + 1);
+
+        newSnakeCords.push({
+          x: sn.x,
+          y: sn.y + 1,
+        });
+      } else {
+        let parts = moveBody(idx, sn);
+
+        newSnakeCords.push({
+          x: parts.x,
+          y: parts.y,
+        });
       }
 
       if (idx === 0 && sn.y + 1 >= GRID_SIZE) {
@@ -155,13 +203,20 @@ const onTick = () => {
     }
   } else if (storeGameRefs.direction.value === "KeyD") {
     for (let [idx, sn] of storeGameRefs.snake.value.entries()) {
-      newSnakeCords.push({
-        x: sn.x + 1,
-        y: sn.y,
-      });
-
       if (idx === 0) {
         foodCheck(sn.x + 1, sn.y);
+
+        newSnakeCords.push({
+          x: sn.x + 1,
+          y: sn.y,
+        });
+      } else {
+        let parts = moveBody(idx, sn);
+
+        newSnakeCords.push({
+          x: parts.x,
+          y: parts.y,
+        });
       }
 
       if (idx === 0 && sn.x + 1 >= GRID_SIZE) {

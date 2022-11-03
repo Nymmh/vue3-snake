@@ -25,12 +25,21 @@ console.log(storeGameRefs);
       <div v-for="(column, columnIdx) in grid" :key="columnIdx">
         <div :class="['grid__cell', `grid__cell--${idx}--${columnIdx}`]">
           <div
-            class="grid__snake"
+            :class="[
+              'grid__snake',
+              { 'grid__snake--show': snake.y === idx && snake.x === columnIdx },
+            ]"
             v-for="(snake, snakeIdx) in storeGameRefs.snake.value"
             :key="snakeIdx"
           >
             <template v-if="snake.y === idx && snake.x === columnIdx">
-              <div class="grid__snake--draw"></div>
+              <div
+                :class="[
+                  'grid__snake--draw',
+                  { 'grid__snake--draw-head': snakeIdx === 0 },
+                ]"
+                :id="`snake-part--${snake.y}--${snake.x}`"
+              />
             </template>
           </div>
           <div
@@ -63,9 +72,14 @@ console.log(storeGameRefs);
   }
 
   &__snake {
+    display: none;
     height: 100%;
     position: relative;
     width: 100%;
+
+    &--show {
+      display: block;
+    }
 
     &--draw {
       background-color: green;
@@ -75,6 +89,10 @@ console.log(storeGameRefs);
       top: 50%;
       transform: translate(50%, -50%);
       width: 50%;
+    }
+
+    &--draw-head {
+      background-color: yellow;
     }
   }
 

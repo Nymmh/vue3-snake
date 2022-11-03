@@ -6,6 +6,7 @@ export const gameStore = defineStore("gameStore", {
   state: () => {
     return {
       snake: [] as coordinates[],
+      snakeLastPos: [] as coordinates[],
       direction: "",
       food: {} as coordinates,
     };
